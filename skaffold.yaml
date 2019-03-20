@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/ericmoritz/jx-skunk-quickstart:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/ericmoritz/jx-skunk-quickstart:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: jx-skunk-quickstart
+        chartPath: charts/jx-skunk-quickstart
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/ericmoritz/jx-skunk-quickstart'
+          image.tag: '{{.DIGEST_HEX}}'
